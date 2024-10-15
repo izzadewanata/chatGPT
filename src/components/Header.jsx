@@ -3,6 +3,7 @@ import React from 'react'
 export default function Header() {
   return (
     <header className="header">
+        
         {/* Greeting */}
         <h2 className="title">Hello, there!</h2>
         <h4 className="subtitle">How can I help you today?</h4>
@@ -15,7 +16,7 @@ export default function Header() {
                 <i class="icon fa-solid fa-newspaper"></i>
             </li>
             <li className="suggestion">
-                <h4 className="text">What's weather in Sydney today?</h4>
+                <h4 className="text">What's the weather today in Sydney?</h4>
                 <i class="icon fa-solid fa-temperature-half"></i>
             </li>
             <li className="suggestion">
@@ -27,6 +28,7 @@ export default function Header() {
                 <i class="icon fa-solid fa-calculator"></i>
             </li>
         </ul>
+
     </header>
   )
 }
