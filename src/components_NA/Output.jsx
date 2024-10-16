@@ -1,6 +1,7 @@
 import React from 'react'
 
 export default function Output() {
+
   return (
     <section className="chat-list">
 

@@ -8,7 +8,6 @@ export default function Header() {
         <h2 className="title">Hello, there!</h2>
         <h4 className="subtitle">How can I help you today?</h4>
 
-
         {/* Suggestion List */}
         <ul className="suggestion-list">
             <li className="suggestion">
