@@ -253,6 +253,11 @@ body {
   flex-direction: column;
 }
 
+/* Only show the loading bars, if the message element contains loading class
+.chat-list .message.loading .loading-indicator {
+  display: flex;
+} */
+
 .chat-list .loading-indicator .loading-bar {
   height: 11px;
   width: 100%;

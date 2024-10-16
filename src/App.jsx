@@ -1,30 +1,88 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
 function App() {
+  const [userMessage, setUserMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const createMessageElement = (content, className) => {
+  // API Configuration
+  const API_KEY = "AIzaSyAsEvSJ1WEU5ix3Yjuv6xQAyQRf4OBAL-g"; // Add your API key
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+  // Create message element
+  const createMessageElement = (content, messageClass, isLoading) => {
     return (
-      <div className={`message ${className}`}>
+      <div className={`message ${messageClass}`}>
         <div className="message-content">
-          <img src="robot.png" alt="Avatar Image" className="avatar" />
+          <img src={messageClass === "incoming" ? "gemini.svg" : "robot.png"} alt="Avatar Image" className="avatar" />
           <p className="text">{content}</p>
+          {isLoading && (
+            <div className="loading-indicator">
+              <div className="loading-bar"></div>
+              <div className="loading-bar"></div>
+              <div className="loading-bar"></div>
+            </div>
+          )}
         </div>
+        <span className="icon fa-solid fa-copy"></span>
       </div>
     );
   };
 
-  const handleOutgoingChat = (e) => {
-    e.preventDefault(); // Preventing Form from submitting
-    const userMessage = e.target.querySelector('.typing-input').value.trim(); // Remove spaces from userMessage
-    if (!userMessage) return;
+  // Fetch response from the API based on user message
+  const generateAPIResponse = async () => {
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: userMessage }],
+            },
+          ],
+        }),
+      });
 
-    const outgoingMessageDiv = createMessageElement(userMessage, 'outgoing');
-    setMessages([...messages, outgoingMessageDiv]);
-
-    e.target.reset(); // Clear input field
+      const data = await response.json();
+      const apiResponse = data?.candidates[0].content.parts[0].text;
+      setMessages((prevMessages) =>
+        prevMessages.map((msg, idx) =>
+          idx === prevMessages.length - 1
+            ? { ...msg, content: apiResponse, loading: false }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Handle sending outgoing chat messages
+  const handleOutgoingChat = (e) => {
+    e.preventDefault();
+    if (!userMessage.trim()) return;
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { content: userMessage, messageClass: "outgoing", loading: false },
+    ]);
+    setUserMessage(""); // clear input field
+
+    // Show loading animation and request API response
+    setLoading(true);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { content: "", messageClass: "incoming", loading: true },
+    ]);
+
+    setTimeout(() => {
+      generateAPIResponse();
+    }, 500);
+  };
 
   return (
     <>
@@ -55,35 +113,38 @@ function App() {
       </header>
 
       <div className="chat-list">
-        {messages.map((message, index) => (
-          <div key={index}>{message}</div>
+        {messages.map((msg, index) => (
+          <div key={index}>
+            {createMessageElement(msg.content, msg.messageClass, msg.loading)}
+          </div>
         ))}
       </div>
 
       <div className="typing-area">
-        <form onSubmit={handleOutgoingChat} className="typing-form">
+        <form action="#" className="typing-form" onSubmit={handleOutgoingChat}>
           <div className="input-wrapper">
             <input
               type="text"
               placeholder="Enter a prompt here"
               className="typing-input"
+              value={userMessage}
+              onChange={(e) => setUserMessage(e.target.value)}
               required
             />
-            <button className="icon fa-solid fa-paper-plane"></button>
+            <button type="submit" className="icon fa-solid fa-paper-plane"></button>
           </div>
           <div className="action-buttons">
             <i className="icon fa-regular fa-sun"></i>
             <i className="icon fa-regular fa-trash-can"></i>
           </div>
         </form>
+
         <p className="note">
-          MicroGPT may display inaccurate information. Ensure to double-check
-          its response.
+          MicroGPT may display inaccurate information. Ensure to double-check its response.
           <br />
           by Izza Sinatrya
         </p>
       </div>
-      
     </>
   );
 }
